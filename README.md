@@ -128,3 +128,4 @@ Si encuentras algún bug, por favor abre un issue en GitHub con:
 ## 💡 Soporte
 
 Para preguntas o soporte, abre un issue en GitHub.
+Muchas gracias :) 
