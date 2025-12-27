@@ -41,6 +41,27 @@ def get_custom_css() -> str:
             border-bottom: 2px solid #667eea;
         }
         
+        /* Botón de colapsar/expandir sidebar */
+        [data-testid="stSidebarCollapsedControl"] {
+            background-color: #667eea !important;
+            color: white !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            z-index: 100 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        [data-testid="stSidebarCollapsedControl"]:hover {
+            background-color: #764ba2 !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5) !important;
+        }
+        
+        [data-testid="stSidebarCollapsedControl"] svg {
+            color: white !important;
+            fill: white !important;
+        }
+        
         /* Títulos */
         h1 {
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -224,9 +245,15 @@ def get_custom_css() -> str:
         }
         
         /* Ocultar elementos de Streamlit */
+        /* Ocultar elementos específicos de Streamlit pero MANTENER el header visible para el botón */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        header {visibility: hidden;}
+        /* header {visibility: hidden;}  <-- ESTO OCULTABA EL BOTÓN */
+        
+        /* Ocultar solo la decoración superior si es necesario, pero permitir interacción */
+        header[data-testid="stHeader"] {
+            background: transparent;
+        }
         
         /* Animaciones */
         @keyframes fadeIn {

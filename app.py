@@ -18,15 +18,15 @@ from calculadora import (
 from styles import get_custom_css, format_currency, format_percentage, create_metric_card
 
 
-# Configuración de la página
+# Configuración de la página - DEBE SER LO PRIMERO
 st.set_page_config(
     page_title="Calculadora de Hipotecas",
     page_icon="🏠",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"  # Esto asegura que inicie expandido
 )
 
-# Aplicar estilos CSS
+# Aplicar estilos CSS DESPUÉS de set_page_config
 st.markdown(get_custom_css(), unsafe_allow_html=True)
 
 
@@ -34,7 +34,7 @@ def main():
     # Título principal
     st.markdown("# 🏠 Calculadora de Amortización de Hipotecas")
     
-    # Sidebar con inputs
+    # Sidebar con inputs - IMPORTANTE: Usar st.sidebar antes que cualquier contenido principal
     with st.sidebar:
         st.markdown("## 📊 Datos del Préstamo")
         
@@ -73,7 +73,7 @@ def main():
             min_value=0.0,
             max_value=20.0,
             value=2.0,
-            step=0.1,
+            step=0.05,
             format="%.2f",
             help="Tipo Anual Efectivo"
         )
