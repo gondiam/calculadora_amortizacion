@@ -9,7 +9,7 @@ def verify_amortization_fee():
     tae = 3.0
     meses = 120
     cantidad_amortizar = 10000.0
-    pct_comision = 0.25
+    pct_comision = 0.5
     
     # 1. Generate base cuadro
     cuadro = generar_cuadro_amortizacion(principal, tae, meses)
