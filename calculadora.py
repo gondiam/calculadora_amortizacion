@@ -92,7 +92,8 @@ def generar_cuadro_amortizacion(
         'interes': 0.0,
         'amortizacion': 0.0,
         'capital_pendiente': capital_pendiente,
-        'amortizacion_anticipada': 0.0
+        'amortizacion_anticipada': 0.0,
+        'comision': 0.0
     })
     
     if sistema == 'frances':
@@ -117,7 +118,8 @@ def generar_cuadro_amortizacion(
                 'interes': interes,
                 'amortizacion': amortizacion,
                 'capital_pendiente': capital_pendiente,
-                'amortizacion_anticipada': 0.0
+                'amortizacion_anticipada': 0.0,
+                'comision': 0.0
             })
     
     else:  # Sistema alemán
@@ -141,7 +143,8 @@ def generar_cuadro_amortizacion(
                 'interes': interes,
                 'amortizacion': amortizacion_fija,
                 'capital_pendiente': capital_pendiente,
-                'amortizacion_anticipada': 0.0
+                'amortizacion_anticipada': 0.0,
+                'comision': 0.0
             })
     
     return pd.DataFrame(datos)
@@ -184,6 +187,7 @@ def aplicar_amortizacion_parcial(
     modo: Literal['cuota', 'plazo'] = 'cuota',
     anios_penalizacion: int = 10,
     pct_penalizacion: float = 0.5,
+    pct_comision: float = 0.25,
     sistema: Literal['frances', 'aleman'] = 'frances'
 ) -> pd.DataFrame:
     """
@@ -191,13 +195,14 @@ def aplicar_amortizacion_parcial(
     
     Args:
         cuadro: Cuadro de amortización existente
-        cantidad: Cantidad a amortizar anticipadamente
+        cantidad: Cantidad a amortizar anticipadamente (Bruta, incluye comisión)
         año_aplicacion: Año en que se aplica la amortización
         mes_aplicacion: Mes del año en que se aplica
         tae: TAE del préstamo
         modo: 'cuota' para reducir cuota, 'plazo' para reducir duración
         anios_penalizacion: Años durante los que aplica penalización
         pct_penalizacion: Porcentaje de penalización
+        pct_comision: Porcentaje de comisión por servicio
         sistema: Sistema de amortización
     
     Returns:
@@ -207,8 +212,6 @@ def aplicar_amortizacion_parcial(
     cuadro_nuevo = cuadro.copy().reset_index(drop=True)
     
     # Buscar la fila que corresponde al año/mes especificado
-    # No podemos asumir que el índice corresponde al mes global porque
-    # después de amortizaciones previas el cuadro se reconstruye
     idx_encontrado = None
     for idx in range(len(cuadro_nuevo)):
         if cuadro_nuevo.iloc[idx]['año'] == año_aplicacion and cuadro_nuevo.iloc[idx]['mes'] == mes_aplicacion:
@@ -218,26 +221,36 @@ def aplicar_amortizacion_parcial(
     if idx_encontrado is None or idx_encontrado < 1:
         return cuadro_nuevo
     
-    # Calcular mes global para penalizaciones (basado en año/mes)
+    # Calcular mes global para penalizaciones
     mes_global = (año_aplicacion - 1) * 12 + mes_aplicacion
+    
+    # Calcular comisión
+    comision = cantidad * (pct_comision / 100)
+    cantidad_efectiva = cantidad - comision
     
     # Obtener capital pendiente antes de la amortización
     capital_antes = cuadro_nuevo.iloc[idx_encontrado]['capital_pendiente']
     
-    # Calcular penalización
+    # Calcular penalización (sobre la cantidad bruta o neta? Normalmente bruta, pero depende de la entidad)
+    # Por defecto aplicamos sobre la cantidad aportada
     penalizacion = calcular_penalizacion(
         cantidad, mes_global, len(cuadro_nuevo) - 1,
         anios_penalizacion, pct_penalizacion
     )
     
-    # Nuevo capital pendiente
-    nuevo_capital = capital_antes - cantidad
+    # Nuevo capital pendiente (se reduce por la cantidad efectiva amortizada)
+    nuevo_capital = capital_antes - cantidad_efectiva
     if nuevo_capital < 0:
+        # Si se paga de más, ajustamos la cantidad efectiva al capital restante
+        # y la comisión proporcionalmente (o simplificamos)
+        cantidad_efectiva = capital_antes
+        comision = cantidad_efectiva / (1 - pct_comision / 100) * (pct_comision / 100)
+        cantidad = cantidad_efectiva + comision
         nuevo_capital = 0
-        cantidad = capital_antes
     
-    # Marcar la amortización anticipada en el cuadro
-    cuadro_nuevo.at[idx_encontrado, 'amortizacion_anticipada'] = cantidad
+    # Marcar la amortización anticipada y comisión en el cuadro
+    cuadro_nuevo.at[idx_encontrado, 'amortizacion_anticipada'] = cantidad_efectiva
+    cuadro_nuevo.at[idx_encontrado, 'comision'] = comision
     cuadro_nuevo.at[idx_encontrado, 'capital_pendiente'] = nuevo_capital
     
     if nuevo_capital == 0:
@@ -249,7 +262,6 @@ def aplicar_amortizacion_parcial(
     
     if modo == 'cuota':
         # Reducir cuota manteniendo plazo
-        # Recalcular la cuota para el capital restante y meses restantes
         if sistema == 'frances':
             nueva_cuota = calcular_cuota_francesa(nuevo_capital, tipo_mensual, meses_restantes_original)
         else:
@@ -283,7 +295,8 @@ def aplicar_amortizacion_parcial(
                 'interes': interes,
                 'amortizacion': amortizacion,
                 'capital_pendiente': capital_pendiente,
-                'amortizacion_anticipada': 0.0
+                'amortizacion_anticipada': 0.0,
+                'comision': 0.0
             })
         
         # Combinar cuadro original hasta el mes de amortización con nuevas filas
@@ -300,7 +313,7 @@ def aplicar_amortizacion_parcial(
         nuevas_filas = []
         mes_contador = 1
         
-        while capital_pendiente > 0.01:  # Tolerancia para errores de redondeo
+        while capital_pendiente > 0.01:
             mes_absoluto = mes_global + mes_contador
             año = (mes_absoluto - 1) // 12 + 1
             mes_del_año = (mes_absoluto - 1) % 12 + 1
@@ -308,7 +321,6 @@ def aplicar_amortizacion_parcial(
             interes = capital_pendiente * tipo_mensual
             amortizacion = cuota_original - interes
             
-            # Si la amortización es mayor que el capital, ajustar
             if amortizacion >= capital_pendiente:
                 amortizacion = capital_pendiente
                 cuota = amortizacion + interes
@@ -324,12 +336,12 @@ def aplicar_amortizacion_parcial(
                 'interes': interes,
                 'amortizacion': amortizacion,
                 'capital_pendiente': capital_pendiente,
-                'amortizacion_anticipada': 0.0
+                'amortizacion_anticipada': 0.0,
+                'comision': 0.0
             })
             
             mes_contador += 1
             
-            # Seguridad para evitar bucle infinito
             if mes_contador > 1000:
                 break
         
@@ -351,6 +363,7 @@ def aplicar_amortizaciones_recurrentes(
     modo: Literal['cuota', 'plazo'] = 'cuota',
     anios_penalizacion: int = 10,
     pct_penalizacion: float = 0.5,
+    pct_comision: float = 0.25,
     sistema: Literal['frances', 'aleman'] = 'frances'
 ) -> pd.DataFrame:
     """
@@ -366,6 +379,7 @@ def aplicar_amortizaciones_recurrentes(
         modo: 'cuota' o 'plazo'
         anios_penalizacion: Años con penalización
         pct_penalizacion: Porcentaje de penalización
+        pct_comision: Porcentaje de comisión
         sistema: Sistema de amortización
     
     Returns:
@@ -412,6 +426,7 @@ def aplicar_amortizaciones_recurrentes(
             modo=modo,
             anios_penalizacion=anios_penalizacion,
             pct_penalizacion=pct_penalizacion,
+            pct_comision=pct_comision,
             sistema=sistema
         )
     
@@ -434,6 +449,7 @@ def calcular_resumen(cuadro: pd.DataFrame) -> dict:
     total_intereses = cuadro_sin_inicio['interes'].sum()
     total_amortizado = cuadro_sin_inicio['amortizacion'].sum()
     total_amortizacion_anticipada = cuadro_sin_inicio['amortizacion_anticipada'].sum()
+    total_comisiones = cuadro_sin_inicio['comision'].sum()
     total_cuotas = cuadro_sin_inicio['cuota'].sum()
     num_cuotas = len(cuadro_sin_inicio)
     
@@ -444,7 +460,6 @@ def calcular_resumen(cuadro: pd.DataFrame) -> dict:
     primera_cuota = cuadro_sin_inicio.iloc[0]['cuota'] if len(cuadro_sin_inicio) > 0 else 0
     
     # Cuota final (después de amortizaciones)
-    # Buscar si hubo amortizaciones anticipadas y obtener la cuota posterior
     cuota_final = primera_cuota
     filas_con_amortizacion = cuadro_sin_inicio[cuadro_sin_inicio['amortizacion_anticipada'] > 0]
     
@@ -461,12 +476,13 @@ def calcular_resumen(cuadro: pd.DataFrame) -> dict:
     
     return {
         'total_intereses': total_intereses,
-        'total_pagado': total_cuotas + total_amortizacion_anticipada,
+        'total_pagado': total_cuotas + total_amortizacion_anticipada + total_comisiones,
         'num_cuotas': num_cuotas,
         'cuota_inicial': primera_cuota,
         'cuota_final': cuota_final,
         'cuota_media': cuota_media,
         'total_amortizacion_anticipada': total_amortizacion_anticipada,
+        'total_comisiones': total_comisiones,
         'duracion_años': num_cuotas / 12
     }
 

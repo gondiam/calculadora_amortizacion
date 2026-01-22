@@ -186,6 +186,19 @@ def main():
             value=10,
             help="Número de años durante los que aplica la penalización"
         )
+        
+        st.markdown("---")
+        st.markdown("## 💸 Comisión")
+        
+        pct_comision = st.number_input(
+            "% Comisión por Servicio",
+            min_value=0.0,
+            max_value=5.0,
+            value=0.25,
+            step=0.05,
+            format="%.2f",
+            help="Comisión descontada de cada amortización anticipada (ej: 0.25%)"
+        )
     
     # Generar cuadros de amortización
     # Cuadro original (sin amortizaciones)
@@ -204,6 +217,7 @@ def main():
             modo=modo_key,
             anios_penalizacion=años_penalizacion,
             pct_penalizacion=pct_penalizacion,
+            pct_comision=pct_comision,
             sistema=sistema_key
         )
     elif habilitar_amortizacion:
@@ -216,6 +230,7 @@ def main():
             modo=modo_key,
             anios_penalizacion=años_penalizacion,
             pct_penalizacion=pct_penalizacion,
+            pct_comision=pct_comision,
             sistema=sistema_key
         )
     else:
@@ -248,6 +263,15 @@ def main():
         )
     
     with col4:
+        st.markdown(
+            create_metric_card("Total Comisiones", format_currency(resumen_final['total_comisiones']), "💸"),
+            unsafe_allow_html=True
+        )
+    
+    # Mostrar fila adicional para duración
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
         duracion_str = f"{resumen_final['duracion_años']:.1f} años"
         st.markdown(
             create_metric_card("Duración Final", duracion_str, "⏱️"),
@@ -348,8 +372,8 @@ def main():
             mode='lines',
             name='Capital Pendiente',
             fill='tozeroy',
-            line=dict(color='#667eea', width=3),
-            fillcolor='rgba(102, 126, 234, 0.3)'
+            line=dict(color='#000000', width=2),
+            fillcolor='rgba(0, 0, 0, 0.05)'
         ))
         
         # Marcar amortizaciones anticipadas
@@ -360,17 +384,17 @@ def main():
                 y=amort_anticipadas['capital_pendiente'].tolist(),
                 mode='markers',
                 name='Amortización Anticipada',
-                marker=dict(color='#f56565', size=12, symbol='star')
+                marker=dict(color='#000000', size=10, symbol='diamond')
             ))
         
         fig_capital.update_layout(
             title="Evolución del Capital Pendiente",
             xaxis_title="Mes",
             yaxis_title="Capital Pendiente (€)",
-            template="plotly_dark",
+            template="plotly_white",
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#e2e8f0'),
+            font=dict(color='#000000'),
             hovermode='x unified'
         )
         
@@ -391,14 +415,14 @@ def main():
             x=cuadro_anual['año'],
             y=cuadro_anual['interes'],
             name='Intereses',
-            marker_color='#f56565'
+            marker_color='#e5e5e5'
         ))
         
         fig_comp.add_trace(go.Bar(
             x=cuadro_anual['año'],
             y=cuadro_anual['amortizacion'],
             name='Amortización',
-            marker_color='#48bb78'
+            marker_color='#000000'
         ))
         
         fig_comp.update_layout(
@@ -406,10 +430,10 @@ def main():
             xaxis_title="Año",
             yaxis_title="Importe (€)",
             barmode='stack',
-            template="plotly_dark",
+            template="plotly_white",
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#e2e8f0'),
+            font=dict(color='#000000'),
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
         )
         
@@ -425,7 +449,7 @@ def main():
             y=cuadro_original['capital_pendiente'],
             mode='lines',
             name='Sin Amortización Anticipada',
-            line=dict(color='#a0aec0', width=2, dash='dash')
+            line=dict(color='#cccccc', width=2, dash='dash')
         ))
         
         # Capital pendiente con amortizaciones
@@ -434,17 +458,17 @@ def main():
             y=cuadro_final['capital_pendiente'],
             mode='lines',
             name='Con Amortización Anticipada',
-            line=dict(color='#667eea', width=3)
+            line=dict(color='#000000', width=2)
         ))
         
         fig_comparativa.update_layout(
             title="Comparativa: Con vs Sin Amortizaciones Anticipadas",
             xaxis_title="Mes",
             yaxis_title="Capital Pendiente (€)",
-            template="plotly_dark",
+            template="plotly_white",
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#e2e8f0'),
+            font=dict(color='#000000'),
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
             hovermode='x unified'
         )
@@ -458,10 +482,10 @@ def main():
     
     # Preparar datos para mostrar
     cuadro_display = cuadro_final.copy()
-    cuadro_display.columns = ['Año', 'Mes', 'Cuota', 'Interés', 'Amortización', 'Capital Pendiente', 'Amort. Anticipada']
+    cuadro_display.columns = ['Año', 'Mes', 'Cuota', 'Interés', 'Amortización', 'Capital Pendiente', 'Amort. Anticipada', 'Comisión']
     
     # Formatear valores monetarios
-    for col in ['Cuota', 'Interés', 'Amortización', 'Capital Pendiente', 'Amort. Anticipada']:
+    for col in ['Cuota', 'Interés', 'Amortización', 'Capital Pendiente', 'Amort. Anticipada', 'Comisión']:
         cuadro_display[col] = cuadro_display[col].apply(lambda x: format_currency(x))
     
     # Mostrar con estilo
