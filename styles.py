@@ -113,11 +113,25 @@ def get_custom_css() -> str:
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important;
         }
 
-        /* Input Controls */
+
+        /* Input Controls - Fix Contrast */
         .stNumberInput input, .stSelectbox [data-baseweb="select"] {
             border-radius: 4px !important;
             border: 1px solid var(--border-color) !important;
             background-color: white !important;
+            color: #000000 !important;
+            caret-color: #000000 !important;
+        }
+
+        /* Fix label contrast in sidebar and main area */
+        .stMarkdown p, .stMarkdown label, .stRadio label, .stCheckbox label {
+            color: #000000 !important;
+        }
+        
+        /* Specifically for input labels */
+        [data-testid="stWidgetLabel"] p {
+             color: #000000 !important;
+             font-weight: 600 !important;
         }
 
         /* Table Aesthetics */
@@ -137,6 +151,7 @@ def get_custom_css() -> str:
 
         .dataframe tbody tr {
             border-bottom: 1px solid var(--border-color) !important;
+            color: #000000 !important;
         }
 
         .dataframe tbody tr:hover {
