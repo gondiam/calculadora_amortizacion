@@ -394,7 +394,7 @@ def main():
             template="plotly_white",
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#000000'),
+
             hovermode='x unified',
             font=dict(color='#000000'),
             title_font=dict(color='#000000'),
@@ -448,7 +448,7 @@ def main():
             plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#000000'),
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(color='#000000')),
-            font=dict(color='#000000'),
+
             title_font=dict(color='#000000'),
             xaxis=dict(
                 title_font=dict(color='#000000'),
@@ -491,7 +491,7 @@ def main():
             template="plotly_white",
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#000000'),
+
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
             hovermode='x unified',
             font=dict(color='#000000'),
