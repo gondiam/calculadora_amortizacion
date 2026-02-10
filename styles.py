@@ -114,46 +114,12 @@ def get_custom_css() -> str:
         }
 
 
-        /* Input Controls - Fix Contrast */
+
+        /* Input Controls */
         .stNumberInput input, .stSelectbox [data-baseweb="select"] {
             border-radius: 4px !important;
             border: 1px solid var(--border-color) !important;
             background-color: white !important;
-            color: #000000 !important;
-            caret-color: #000000 !important;
-        }
-
-
-        /* Specific Fixes for Radio Buttons and Checkboxes */
-        .stRadio div[role="radiogroup"] > label {
-            color: #000000 !important;
-            font-weight: 500 !important;
-        }
-        
-        .stRadio label p {
-            color: #000000 !important;
-            font-size: 1rem !important;
-        }
-
-        .stCheckbox label p {
-            color: #000000 !important;
-            font-weight: 500 !important;
-        }
-
-        /* General Widget Labels */
-        .stMarkdown p, .stMarkdown li, h1, h2, h3, h4, h5, h6 {
-            color: #000000 !important;
-        }
-        
-        /* Input Labels */
-        [data-testid="stWidgetLabel"] {
-             color: #000000 !important;
-             font-weight: 600 !important;
-        }
-
-        /* Selectbox and Input text */
-        .stSelectbox div[data-baseweb="select"] > div {
-            color: #000000 !important;
         }
 
 
