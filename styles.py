@@ -176,7 +176,7 @@ def get_custom_css() -> str:
         #MainMenu { display: none !important; }
     </style>
     """
-    """
+
 
 
 def format_currency(value: float) -> str:
