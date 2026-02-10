@@ -395,7 +395,20 @@ def main():
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#000000'),
-            hovermode='x unified'
+            hovermode='x unified',
+            font=dict(color='#000000'),
+            title_font=dict(color='#000000'),
+            legend_font=dict(color='#000000'),
+            xaxis=dict(
+                title_font=dict(color='#000000'),
+                tickfont=dict(color='#000000'),
+                gridcolor='#f0f0f0'
+            ),
+            yaxis=dict(
+                title_font=dict(color='#000000'),
+                tickfont=dict(color='#000000'),
+                gridcolor='#f0f0f0'
+            )
         )
         
         st.plotly_chart(fig_capital, use_container_width=True)
@@ -434,7 +447,17 @@ def main():
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#000000'),
-            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(color='#000000')),
+            font=dict(color='#000000'),
+            title_font=dict(color='#000000'),
+            xaxis=dict(
+                title_font=dict(color='#000000'),
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                title_font=dict(color='#000000'),
+                tickfont=dict(color='#000000')
+            )
         )
         
         st.plotly_chart(fig_comp, use_container_width=True)
@@ -470,7 +493,20 @@ def main():
             plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#000000'),
             legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-            hovermode='x unified'
+            hovermode='x unified',
+            font=dict(color='#000000'),
+            title_font=dict(color='#000000'),
+            legend_font=dict(color='#000000'),
+            xaxis=dict(
+                title_font=dict(color='#000000'),
+                tickfont=dict(color='#000000'),
+                gridcolor='#f0f0f0'
+            ),
+            yaxis=dict(
+                title_font=dict(color='#000000'),
+                tickfont=dict(color='#000000'),
+                gridcolor='#f0f0f0'
+            )
         )
         
         st.plotly_chart(fig_comparativa, use_container_width=True)

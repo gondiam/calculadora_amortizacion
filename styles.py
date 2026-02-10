@@ -123,16 +123,39 @@ def get_custom_css() -> str:
             caret-color: #000000 !important;
         }
 
-        /* Fix label contrast in sidebar and main area */
-        .stMarkdown p, .stMarkdown label, .stRadio label, .stCheckbox label {
+
+        /* Specific Fixes for Radio Buttons and Checkboxes */
+        .stRadio div[role="radiogroup"] > label {
+            color: #000000 !important;
+            font-weight: 500 !important;
+        }
+        
+        .stRadio label p {
+            color: #000000 !important;
+            font-size: 1rem !important;
+        }
+
+        .stCheckbox label p {
+            color: #000000 !important;
+            font-weight: 500 !important;
+        }
+
+        /* General Widget Labels */
+        .stMarkdown p, .stMarkdown li, h1, h2, h3, h4, h5, h6 {
             color: #000000 !important;
         }
         
-        /* Specifically for input labels */
-        [data-testid="stWidgetLabel"] p {
+        /* Input Labels */
+        [data-testid="stWidgetLabel"] {
              color: #000000 !important;
              font-weight: 600 !important;
         }
+
+        /* Selectbox and Input text */
+        .stSelectbox div[data-baseweb="select"] > div {
+            color: #000000 !important;
+        }
+
 
         /* Table Aesthetics */
         .dataframe {
